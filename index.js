@@ -148,12 +148,14 @@ async function getAllSubjects() {
 
 app.get("/subjects", cache("subjects"), async (req, res) => {
   let subjectJson = await getAllSubjects();
-  res.json(subjectJson);
 
   console.log("fetched from the api");
 
   // Set data to Redis
   await client.json.set("subjects", ".", subjectJson);
+
+  res.status(200).json(subjectJson);
+  return;
 });
 
 app.delete("/students/:id", async (req, res) => {
@@ -193,6 +195,7 @@ app.put("/students/:id", async (req, res) => {
       ]
     );
 
+    console.log(newStudent);
     await pool.query("DELETE FROM marks WHERE studentId=$1", [id]);
 
     for (let index = 0; index < newStudent.enrolledSubjects.length; ++index) {
@@ -347,7 +350,8 @@ function cache(dataKey) {
   return async function cache(req, res, next) {
     const data = await client.json.get(dataKey);
 
-    if (data != null) {
+    
+    if (data != null && data.length!=0) {
       res.json(data);
       console.log("cached data sent");
     } else {

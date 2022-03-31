@@ -47,10 +47,12 @@ cron.schedule("* * * * *", async function () {
 
     console.log(averageMarksOfStudent, averageMarksOfSubject);
 
-    await pool.query(
-      "INSERT INTO average (title,averagemarks) VALUES ($1,$2) ON CONFLICT (title) DO UPDATE SET averagemarks = $3",
-      ["student", averageMarksOfStudent, averageMarksOfStudent]
-    );
+    if (totalMarks != 0 || count != 0) {
+      await pool.query(
+        "INSERT INTO average (title,averagemarks) VALUES ($1,$2) ON CONFLICT (title) DO UPDATE SET averagemarks = $3",
+        ["student", averageMarksOfStudent, averageMarksOfStudent]
+      );
+    }
 
     let keys = Object.keys(averageMarksOfSubject);
     for (let subject of keys) {
